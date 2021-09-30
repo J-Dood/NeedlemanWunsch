@@ -146,8 +146,17 @@ def main():
     max_score = result[0]
     alighnments = get_alighnment(result[1], sequences[0], sequences[1])
     print("Max score: " + str(max_score))
-    print(alighnments[0][::-1])
-    print(alighnments[1][::-1])
+    alighned1 = alighnments[0][::-1]
+    alighned2 = alighnments[1][::-1]
+    compare_seq = ""
+    for i in range(len(alighned1)):
+        if alighned1[i] == alighned2[i]:
+            compare_seq += '|'
+        else:
+            compare_seq += '*'
+    print(alighned1)
+    print(compare_seq)
+    print(alighned2)
 
 
 # Call main
