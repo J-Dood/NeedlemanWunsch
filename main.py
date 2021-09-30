@@ -5,9 +5,7 @@
 
 # Function to handle scoring character comparisons
 def score(char1, char2):
-    if char1 == '_' and char2 == '_':
-        raise NameError("Matching Blanks!")
-    elif char1 == char2:
+    if char1 == char2:
         return 2
     else:
         return -1
@@ -16,54 +14,102 @@ def score(char1, char2):
 # Function to fill in any given grid space
 def calculate_score(table, row, column, seq1, seq2):
     if row == 0:
-        return column*-1
+        value = column*-1
+        move = 6 # Move left
     elif column == 0:
-        return row*-1
+        value = row*-1
+        move = 4 # Move up
     else:
-        a = table[row-1][column-1]
-        b = table[row-1][column]
-        c = table[row][column - 1]
-        char1 = seq1[row]
-        char2 = seq2[column]
+        char1 = seq1[row-1]
+        char2 = seq2[column-1]
+        a = table[row-1][column-1] + score(char1, char2)
+        b = table[row-1][column] - 1
+        c = table[row][column - 1] - 1
         if a > b and a > c:
-            return a + score(char1, char2)
+            value = a
             # Diagonal move only
-            # Put code to fill out path table here
+            move = 0
         elif a > b and a == c:
-            return a + score(char1, char2)
+            value = a
             # Diagonal and left move
-            # Put code to fill out path table here
+            move = 1
         elif a > c and a == b:
-            return a + score(char1, char2)
+            value = a
             # Diagonal and vertical move
-            # Put code to fill out path table here
+            move = 2
         elif a == b and a == c:
-            return a + score(char1, char2)
+            value = a
             # Diagonal and left and vertical move
-            # Put code to fill out path table here
+            move = 3
         elif b > a and b > c:
-            return b + score(char1, char2)
+            value = b
             # Vertical move only
-            # Put code to fill out path table here
+            move = 4
         elif b > a and b == c:
-            return b + score(char1, char2)
+            value = b
             # Left and vertical move
-            # Put code to fill out path table here
+            move = 5
         else:
-            return c + score(char1, char2)
+            value = c
             # Vertical move only
-            # Put code to fill out path table here
+            move = 6
+    return value, move
 
 
 # The Needleman-Wunsch algorithm
 def needleman_wunsch(seq1, seq2):
-    table = []
-    for i in range(len(seq1)):
-        table.append([])
-        for j in range(len(seq2)):
-            table[i].append(calculate_score(table, i, j, seq1, seq2))
+    score_table = []
+    move_table = []
+    for i in range(len(seq1)+1):
+        score_table.append([])
+        move_table.append([])
+        for j in range(len(seq2)+1):
+            scores = calculate_score(score_table, i, j, seq1, seq2)
+            score_table[i].append(scores[0])
+            move_table[i].append(scores[1])
             # Loops through table filling in values
-    return table[len(seq1)-1][len(seq2)-1]
+    return score_table[len(seq1)][len(seq2)], move_table
+
+def get_alighnment(table, seq1, seq2):
+    alighnment_seq1 = ""
+    alighnment_seq2 = ""
+    i, j = len(seq1), len(seq2)
+    while i != 0  or j != 0:
+        x = table[i][j]
+        if x == 0:
+            alighnment_seq1 += seq1[i-1]
+            alighnment_seq2 += seq2[j-1]
+            i -= 1
+            j -= 1
+        elif x == 1:
+            alighnment_seq1 += seq1[i-1]
+            alighnment_seq2 += seq2[j-1]
+            i -= 1
+            j -= 1
+        elif x == 2:
+            alighnment_seq1 += seq1[i-1]
+            alighnment_seq2 += seq2[j-1]
+            i -= 1
+            j -= 1
+        elif x == 3:
+            alighnment_seq1 += seq1[i-1]
+            alighnment_seq2 += seq2[j-1]
+            i -= 1
+            j -= 1
+        elif x == 4:
+            alighnment_seq1 += seq1[i-1]
+            alighnment_seq2 += '_'
+            i -= 1
+        elif x == 5:
+            alighnment_seq1 += seq1[i-1]
+            alighnment_seq2 += '_'
+            i -= 1
+        else: # Case 6
+            alighnment_seq1 += '_'
+            alighnment_seq2 += seq2[j-1]
+            j -= 1
+    return alighnment_seq1, alighnment_seq2
+
 
 
 def main():
@@ -96,7 +142,12 @@ def main():
     # Append seq to sequences list
     sequences.append(seq)
     # Call algorithm
-    print(needleman_wunsch(sequences[0], sequences[1]))
+    result = needleman_wunsch(sequences[0], sequences[1])
+    max_score = result[0]
+    alighnments = get_alighnment(result[1], sequences[0], sequences[1])
+    print("Max score: " + str(max_score))
+    print(alighnments[0][::-1])
+    print(alighnments[1][::-1])
 
 
 # Call main
